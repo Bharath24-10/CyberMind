@@ -16,11 +16,13 @@ type Job = {
 
 export default function HomePage() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/jobs`);
+        console.log('Fetching from:', baseUrl);
+        const res = await fetch(`${baseUrl}/jobs`);
         if (!res.ok) throw new Error('Failed to fetch jobs');
         const data = await res.json();
         setJobs(data);
@@ -29,7 +31,7 @@ export default function HomePage() {
       }
     }
     fetchJobs();
-  }, []);
+  }, [baseUrl]);
 
   return (
     <>
