@@ -79,7 +79,7 @@ export default function Navbar() {
   };
 
   try {
-    const response = await fetch('http://localhost:3002/jobs', {
+    const response = await fetch('https://cybermind-di3j.onrender.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(jobData),
