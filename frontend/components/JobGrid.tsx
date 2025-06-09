@@ -1,10 +1,20 @@
 'use client';
 
-import {Box, Button, Card, Flex, Grid, Image, Text,} from '@mantine/core';
+import { Box, Button, Card, Flex, Grid, Image, Text } from '@mantine/core';
 import { IconUser, IconMapPin, IconBriefcase } from '@tabler/icons-react';
-import { useState } from 'react';
+import React from 'react';
 
-const jobs = [
+type Job = {
+  logo: string;
+  role: string;
+  posted: string;
+  experience: string;
+  type: string;
+  salary: string;
+  description?: string[];
+};
+
+const defaultJobs: Job[] = [
   {
     logo: '/amazon.jpg',
     role: 'Full Stack Developer',
@@ -12,30 +22,10 @@ const jobs = [
     experience: '1–3 yr Exp',
     type: 'Onsite',
     salary: '12LPA',
-  },
-  {
-    logo: '/tesla-logo-tesla-icon-transparent-png-free-vector.jpg',
-    role: 'Node Js Developer',
-    posted: '24h Ago',
-    experience: '1–3 yr Exp',
-    type: 'Onsite',
-    salary: '12LPA',
-  },
-  {
-    logo: '/swiggyi.jpg',
-    role: 'UX/UI Designer',
-    posted: '24h Ago',
-    experience: '1–3 yr Exp',
-    type: 'Onsite',
-    salary: '12LPA',
-  },
-  {
-    logo: '/amazon.jpg',
-    role: 'Full Stack Developer',
-    posted: '24h Ago',
-    experience: '1–3 yr Exp',
-    type: 'Onsite',
-    salary: '12LPA',
+    description: [
+      'A user-friendly interface lets you browse stunning photos and videos',
+      'Filter destinations based on interests and travel style, and create personalized',
+    ],
   },
   {
     logo: '/tesla-logo-tesla-icon-transparent-png-free-vector.jpg',
@@ -44,6 +34,10 @@ const jobs = [
     experience: '1–3 yr Exp',
     type: 'Onsite',
     salary: '12LPA',
+    description: [
+      'Work with cutting-edge Node.js technologies',
+      'Collaborate with frontend developers to create seamless user experiences',
+    ],
   },
   {
     logo: '/swiggyi.jpg',
@@ -52,6 +46,10 @@ const jobs = [
     experience: '1–3 yr Exp',
     type: 'Onsite',
     salary: '12LPA',
+    description: [
+      'Design intuitive user interfaces',
+      'Work closely with product and development teams',
+    ],
   },
   {
     logo: '/amazon.jpg',
@@ -60,6 +58,10 @@ const jobs = [
     experience: '1–3 yr Exp',
     type: 'Onsite',
     salary: '12LPA',
+    description: [
+      'Develop scalable backend services',
+      'Implement RESTful APIs and database integration',
+    ],
   },
   {
     logo: '/tesla-logo-tesla-icon-transparent-png-free-vector.jpg',
@@ -68,14 +70,51 @@ const jobs = [
     experience: '1–3 yr Exp',
     type: 'Onsite',
     salary: '12LPA',
+    description: [
+      'Optimize performance and scalability',
+      'Write clean, maintainable code',
+    ],
   },
-  
-  // You can add more jobs as needed
+  {
+    logo: '/swiggyi.jpg',
+    role: 'UI/UX Developer',
+    posted: '24h Ago',
+    experience: '1–3 yr Exp',
+    type: 'Onsite',
+    salary: '12LPA',
+    description: [
+      'Conduct user research and testing',
+      'Create wireframes and prototypes',
+    ],
+  },
+  {
+    logo: '/amazon.jpg',
+    role: 'Full Stack Developer',
+    posted: '24h Ago',
+    experience: '1–3 yr Exp',
+    type: 'Onsite',
+    salary: '12LPA',
+    description: [
+      'Manage cloud infrastructure',
+      'Ensure application security',
+    ],
+  },
+  {
+    logo: '/tesla-logo-tesla-icon-transparent-png-free-vector.jpg',
+    role: 'Node JS Developer',
+    posted: '24h Ago',
+    experience: '1–3 yr Exp',
+    type: 'Onsite',
+    salary: '12LPA',
+    description: [
+      'Implement microservices architecture',
+      'Collaborate with cross-functional teams',
+    ],
+  },
 ];
 
-export default function JobGrid() {
-  // Track which jobs are applied, store index keys in a Set
-  const [appliedJobs, setAppliedJobs] = useState<Set<number>>(new Set());
+export default function JobGrid({ jobs = defaultJobs }: { jobs?: Job[] }) {
+  const [appliedJobs, setAppliedJobs] = React.useState<Set<number>>(new Set());
 
   const handleApplyClick = (index: number) => {
     setAppliedJobs((prev) => new Set(prev).add(index));
@@ -88,7 +127,6 @@ export default function JobGrid() {
           <Grid.Col span={{ base: 12, sm: 6, md: 3 }} key={index}>
             <Card shadow="sm" padding="md" radius="md" withBorder bg="white">
               <Flex justify="space-between" align="center">
-                {/* Enlarged Logo */}
                 <Box w={60} h={60} style={{ overflow: 'hidden', borderRadius: '50%' }}>
                   <Image
                     src={job.logo}
@@ -104,8 +142,8 @@ export default function JobGrid() {
                   size="xs"
                   radius="l"
                   styles={{
-                    root: { backgroundColor: '#B0D9FF' }, // Mantine's blue[6]
-                    label: { color: 'black' }
+                    root: { backgroundColor: '#B0D9FF' },
+                    label: { color: 'black' },
                   }}
                 >
                   {job.posted}
@@ -133,12 +171,11 @@ export default function JobGrid() {
 
               <Box mt="xs" ml="xs">
                 <ul style={{ paddingLeft: 16, marginBottom: 10 }}>
-                  <li style={{ fontSize: '12px' }}>
-                    A user-friendly interface lets you browse stunning photos and videos
-                  </li>
-                  <li style={{ fontSize: '12px' }}>
-                    Filter destinations based on interests and travel style, and create personalized
-                  </li>
+                  {job.description?.map((desc, i) => (
+                    <li key={i} style={{ fontSize: '12px' }}>
+                      {desc}
+                    </li>
+                  )) || <li style={{ fontSize: '12px' }}>No description available.</li>}
                 </ul>
               </Box>
 
