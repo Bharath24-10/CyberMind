@@ -25,7 +25,7 @@ import {
 import { useState } from 'react';
 import type { Job } from './JobGrid';
 
-type NavbarProps = {};
+
 
 export default function Navbar() {
   // State for form fields
