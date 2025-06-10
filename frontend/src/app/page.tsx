@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar';
 import JobGrid from '@/components/JobGrid';
 import { useEffect, useState } from 'react';
 import { defaultJobs, Job } from '@/components/JobGrid';
-import { Select } from '@mantine/core';
+
 
 import '@mantine/core/styles.css';
 
@@ -32,7 +32,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Navbar onAddJob={(job) => setJobs((prev) => [...prev, job])} />
+      <Navbar  />
       <JobGrid jobs={allJobs} />
     </>
   );

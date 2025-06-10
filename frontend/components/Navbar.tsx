@@ -3,7 +3,6 @@
 import {
   Box,
   Button,
-  CloseButton,
   Container,
   Divider,
   Flex,
@@ -26,11 +25,9 @@ import {
 import { useState } from 'react';
 import type { Job } from './JobGrid';
 
-type NavbarProps = {
-  onAddJob: (job: Job) => void;
-};
+type NavbarProps = {};
 
-export default function Navbar({ onAddJob }: NavbarProps) {
+export default function Navbar() {
   // State for form fields
   const [salaryRange, setSalaryRange] = useState<[number, number]>([50000, 150000]);
   const [showForm, setShowForm] = useState(false);
@@ -101,7 +98,7 @@ export default function Navbar({ onAddJob }: NavbarProps) {
       setSalaryRange([50000, 150000]);
       setApplicationDeadline('');
       setJobDescription('');
-    } catch (err) {
+    } catch  {
       alert('Failed to add job to backend');
     }
   };

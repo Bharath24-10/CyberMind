@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-let jobs: any[] = []; // In-memory store
+type Job = {
+  logo: string;
+  role: string;
+  posted: string;
+  experience: string;
+  type: string;
+  salary: string;
+  description: string[];
+};
+
+const jobs: Job[] = []; // Use const and a specific type
 
 export async function GET() {
   return NextResponse.json(jobs);
