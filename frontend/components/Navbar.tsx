@@ -8,6 +8,7 @@ import {
   Divider,
   Flex,
   Image,
+  Modal,
   Select,
   Text,
   TextInput,
@@ -23,8 +24,13 @@ import {
   IconSearch,
 } from '@tabler/icons-react';
 import { useState } from 'react';
+import type { Job } from './JobGrid';
 
-export default function Navbar() {
+type NavbarProps = {
+  onAddJob: (job: Job) => void;
+};
+
+export default function Navbar({ onAddJob }: NavbarProps) {
   // State for form fields
   const [salaryRange, setSalaryRange] = useState<[number, number]>([50000, 150000]);
   const [showForm, setShowForm] = useState(false);
@@ -51,184 +57,153 @@ export default function Navbar() {
   const handleSalaryMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const filtered = e.currentTarget.value.replace(/\D/g, '');
     setSalaryMin(filtered);
-    setSalaryRange([Number(filtered || 0), salaryRange[1]]);
+    
   };
 
   const handleSalaryMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const filtered = e.currentTarget.value.replace(/\D/g, '');
     setSalaryMax(filtered);
-    setSalaryRange([salaryRange[0], Number(filtered || 0)]);
+    
   };
 
-  // The main function to POST job data to backend
+  // Handle form submit: add job to UI
   const handlePublish = async () => {
-  if (!jobTitle || !companyName || !selectedLocation || !jobType) {
-    alert('Please fill in all required fields.');
-    return;
-  }
+    if (!jobTitle || !companyName || !selectedLocation || !jobType) {
+      alert('Please fill in all required fields.');
+      return;
+    }
 
-  const jobData = {
-    title: jobTitle,
-    company: companyName,
-    location: selectedLocation,
-    jobType,
-    salaryMin: Number(salaryMin),
-    salaryMax: Number(salaryMax),
-    applicationDeadline,
-    description: jobDescription,
+    const newJob: Job = {
+      logo: '/cmwlogo.svg',
+      role: jobTitle,
+      posted: 'Now',
+      experience: '0–1 yr Exp',
+      type: jobType,
+      salary: `₹${salaryMin}–₹${salaryMax}`,
+      description: jobDescription ? [jobDescription] : [],
+    };
+
+    // Send to backend
+    try {
+      const res = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newJob),
+      });
+      if (!res.ok) throw new Error('Failed to add job to backend');
+      setShowForm(false);
+      setJobTitle('');
+      setCompanyName('');
+      setSelectedLocation('');
+      setJobType('');
+      setSalaryMin('50000');
+      setSalaryMax('150000');
+      setSalaryRange([50000, 150000]);
+      setApplicationDeadline('');
+      setJobDescription('');
+    } catch (err) {
+      alert('Failed to add job to backend');
+    }
   };
-  console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
-
-  try {
-    const response = await fetch('https://cybermind-di3j.onrender.com/jobs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jobData),
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    const result = await response.json();
-    console.log('Job created:', result);
-    alert('Job created successfully!');
-    setShowForm(false);
-    // Reset form states...
-  } catch (error) {
-    console.error('Error creating job:', error);
-    alert('Failed to create job');
-  }
-};
-
 
   return (
     <>
-      {showForm && (
-        <>
-          <Box
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              zIndex: 999,
-            }}
+      {/* Mantine Modal for Job Creation */}
+      <Modal
+        opened={showForm}
+        onClose={() => setShowForm(false)}
+        title="Create Job Opening"
+        centered
+        size="lg"
+        padding="lg"
+        radius="md"
+      >
+        <Flex direction="column" gap="md">
+          <Flex gap="sm">
+            <TextInput
+              label="Job Title"
+              placeholder="Full Stack Developer"
+              w="100%"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.currentTarget.value)}
+            />
+            <TextInput
+              label="Company Name"
+              placeholder="Amazon, Microsoft, Swiggy"
+              w="100%"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.currentTarget.value)}
+            />
+          </Flex>
+
+          <Flex gap="sm">
+            <TextInput
+              label="Location"
+              placeholder="Enter Preferred Location"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.currentTarget.value)}
+              w="100%"
+            />
+
+            <Select
+              label="Job Type"
+              placeholder="Select job type"
+              data={[
+                { value: 'Full-time', label: 'Full-time' },
+                { value: 'Part-time', label: 'Part-time' },
+                { value: 'Internship', label: 'Internship' },
+              ]}
+              value={jobType}
+              onChange={(value) => setJobType(value || '')}
+              w="100%"
+            />
+          </Flex>
+
+          <Flex gap="sm" align="flex-end">
+             <TextInput
+    label="Minimum Salary"
+    placeholder="₹0"
+    w={280}
+    onChange={handleSalaryMinChange}
+    rightSection={<Text size="sm">₹</Text>}
+  />
+  <TextInput
+    label="Maximum Salary"
+    placeholder="₹12,00,000"
+    w={280}
+    onChange={handleSalaryMaxChange}
+    rightSection={<Text size="sm">₹</Text>}
+  />
+
+            <TextInput
+              label="Application Deadline"
+              placeholder="DD/MM/YYYY"
+              rightSection={<IconCalendar size={16} />}
+              w="100%"
+              value={applicationDeadline}
+              onChange={handleDeadlineChange}
+            />
+          </Flex>
+
+          <Textarea
+            label="Job Description"
+            placeholder="Please share a description to let the candidate know more about the job role"
+            autosize
+            minRows={3}
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.currentTarget.value)}
           />
 
-          <Box
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'white',
-              padding: rem(24),
-              borderRadius: rem(12),
-              boxShadow: '0 0 8px rgba(0,0,0,0.15)',
-              zIndex: 1000,
-              width: rem(640),
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-          >
-            <Flex justify="space-between" align="center" mb="md">
-              <Text fw={700} size="lg">
-                Create Job Opening
-              </Text>
-              <CloseButton onClick={() => setShowForm(false)} />
-            </Flex>
-
-            <Flex direction="column" gap="md">
-              <Flex gap="sm">
-                <TextInput
-                  label="Job Title"
-                  placeholder="Full Stack Developer"
-                  w="100%"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.currentTarget.value)}
-                />
-                <TextInput
-                  label="Company Name"
-                  placeholder="Amazon, Microsoft, Swiggy"
-                  w="100%"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.currentTarget.value)}
-                />
-              </Flex>
-
-              <Flex gap="sm">
-                <TextInput
-                  label="Location"
-                  placeholder="Enter Preferred Location"
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.currentTarget.value)}
-                  w="100%"
-                />
-
-                <TextInput
-                  label="Job Type"
-                  placeholder="e.g., Full-time, Part-time"
-                  value={jobType}
-                  onChange={(e) => setJobType(e.currentTarget.value)}
-                  w="100%"
-                />
-              </Flex>
-
-              <Flex gap="sm" align="flex-end">
-                <Box w="100%">
-                  <Text size="sm" fw={500} mb={4}>
-                    Salary Range
-                  </Text>
-                  <Flex gap="sm">
-                    <TextInput
-                      placeholder="₹0"
-                      w="100%"
-                      value={salaryMin}
-                      onChange={handleSalaryMinChange}
-                      rightSection={<Text size="sm">₹</Text>}
-                    />
-                    <TextInput
-                      placeholder="₹12,00,000"
-                      w="100%"
-                      value={salaryMax}
-                      onChange={handleSalaryMaxChange}
-                      rightSection={<Text size="sm">₹</Text>}
-                    />
-                  </Flex>
-                </Box>
-
-                <TextInput
-                  label="Application Deadline"
-                  placeholder="DD/MM/YYYY"
-                  rightSection={<IconCalendar size={16} />}
-                  w="100%"
-                  value={applicationDeadline}
-                  onChange={handleDeadlineChange}
-                />
-              </Flex>
-
-              <Textarea
-                label="Job Description"
-                placeholder="Please share a description to let the candidate know more about the job role"
-                autosize
-                minRows={3}
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.currentTarget.value)}
-              />
-
-              <Flex justify="space-between" mt="sm">
-                <Button variant="default" radius="md" onClick={() => alert('Draft saved!')}>
-                  Save Draft
-                </Button>
-                <Button radius="md" size="md" variant="filled" color="blue" onClick={handlePublish}>
-                  Publish
-                </Button>
-              </Flex>
-            </Flex>
-          </Box>
-        </>
-      )}
+          <Flex justify="space-between" mt="sm">
+            <Button variant="default" radius="md" onClick={() => alert('Draft saved!')}>
+              Save Draft
+            </Button>
+            <Button radius="md" size="md" variant="filled" color="blue" onClick={handlePublish}>
+              Publish
+            </Button>
+          </Flex>
+        </Flex>
+      </Modal>
 
       {/* Main Navbar */}
       <Box
@@ -323,7 +298,7 @@ export default function Navbar() {
               <Select
                 leftSection={<IconBriefcase size={16} />}
                 placeholder="Job type"
-                data={['Full-time', 'Part-time', 'Contract', 'Internship']}
+                data={['Full-time', 'Part-time',  'Internship']}
                 w="100%"
                 styles={{ input: inputStyle }}
                 rightSection={<IconChevronDown size={16} />}

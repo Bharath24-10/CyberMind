@@ -4,7 +4,7 @@ import { Box, Button, Card, Flex, Grid, Image, Text } from '@mantine/core';
 import { IconUser, IconMapPin, IconBriefcase } from '@tabler/icons-react';
 import React from 'react';
 
-type Job = {
+export type Job = {
   logo: string;
   role: string;
   posted: string;
@@ -14,7 +14,7 @@ type Job = {
   description?: string[];
 };
 
-const defaultJobs: Job[] = [
+export const defaultJobs: Job[] = [
   {
     logo: '/amazon.jpg',
     role: 'Full Stack Developer',
@@ -170,14 +170,18 @@ export default function JobGrid({ jobs = defaultJobs }: { jobs?: Job[] }) {
               </Flex>
 
               <Box mt="xs" ml="xs">
-                <ul style={{ paddingLeft: 16, marginBottom: 10 }}>
-                  {job.description?.map((desc, i) => (
-                    <li key={i} style={{ fontSize: '12px' }}>
-                      {desc}
-                    </li>
-                  )) || <li style={{ fontSize: '12px' }}>No description available.</li>}
-                </ul>
-              </Box>
+  <ul style={{ paddingLeft: 16, marginBottom: 10 }}>
+    {Array.isArray(job.description) && job.description.length > 0 ? (
+      job.description.map((desc, i) => (
+        <li key={i} style={{ fontSize: '12px' }}>
+          {desc}
+        </li>
+      ))
+    ) : (
+      <li style={{ fontSize: '12px' }}>No description available.</li>
+    )}
+  </ul>
+</Box>
 
               <Button
                 fullWidth

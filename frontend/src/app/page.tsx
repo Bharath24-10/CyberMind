@@ -1,42 +1,39 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+"use client";
 import Navbar from '@/components/Navbar';
 import JobGrid from '@/components/JobGrid';
+import { useEffect, useState } from 'react';
+import { defaultJobs, Job } from '@/components/JobGrid';
+import { Select } from '@mantine/core';
 
-type Job = {
-  logo: string;
-  role: string;
-  posted: string;
-  experience: string;
-  type: string;
-  salary: string;
-  description?: string[];
-};
+import '@mantine/core/styles.css';
 
 export default function HomePage() {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     async function fetchJobs() {
       try {
-        console.log('Fetching from:', baseUrl);
-        const res = await fetch(`${baseUrl}/jobs`);
-        if (!res.ok) throw new Error('Failed to fetch jobs');
+        const res = await fetch('/api/jobs');
+        if (!res.ok) throw new Error(`Failed to fetch jobs: ${res.status}`);
         const data = await res.json();
         setJobs(data);
       } catch (error) {
         console.error('Error fetching jobs:', error);
       }
     }
+
     fetchJobs();
-  }, [baseUrl]);
+    const interval = setInterval(fetchJobs, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Combine static and backend jobs (static first, then backend)
+  const allJobs = [...defaultJobs, ...jobs];
 
   return (
     <>
-      <Navbar />
-      <JobGrid jobs={jobs.length > 0 ? jobs : undefined} />
+      <Navbar onAddJob={(job) => setJobs((prev) => [...prev, job])} />
+      <JobGrid jobs={allJobs} />
     </>
   );
 }
